@@ -22,8 +22,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/getprofile', [ApiController::class, 'show']);
-    Route::POST('/logout', [ApiController::class, 'destroy']);
+    Route::get('/profile', [ApiController::class, 'show']);
+    Route::post('/update', [ApiController::class, 'update']);
+    Route::post('/logout', [ApiController::class, 'destroy']);
 
 });
 

@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 
+use Laravel\Sanctum\HasApiTokens;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
-use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Validator;
 
 
 
@@ -90,9 +92,27 @@ class ApiController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request)
     {
-        //
+        $user = Auth::user();
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'company' => 'nullable|string|max:255',
+            'job' => 'nullable|string|max:255',
+            'country' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user->update($request->all());
+
+        return response()->json(['message' => 'Profile updated successfully!', 'user' => $user], 200);
     }
 
     /**
@@ -101,5 +121,6 @@ class ApiController extends Controller
     public function destroy(User $user)
     {
         $user->tokens()->delete();
+        return response()->json(['message' => 'Logout successfully!'], 200);
     }
 }

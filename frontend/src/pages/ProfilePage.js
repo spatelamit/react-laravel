@@ -4,36 +4,74 @@ import axios from 'axios';
 import useAuthRedirect from '../Common/useAuthRedirect';
 
 const ProfilePage = () => {
-    const [profileData, setProfileData] = useState([]);
+    const [profileData, setProfile] = useState({
+        name: '',
+        company: '',
+        job: '',
+        country: '',
+        address: '',
+        phone: '',
+        email: ''
+    });
+    const [loading, setLoading] = useState(true);
+    const [message, setMessage] = useState('');
     useAuthRedirect();
+
     useEffect(() => {
+        // Fetch the user profile data when the component mounts
+        axios.get(window.API_BASE_URL + '/profile',
+            {
+                headers: {
+                    Authorization: `Bearer ${window.TOKEN}`
+                }
+            })
+            .then(response => {
+                setProfile(response.data);
+                setLoading(false);
+            })
+            .catch(error => {
+                setMessage('Failed to fetch profile');
+                setLoading(false);
+            });
+    }, []);
 
-        async function fetchData() {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await axios.get(window.API_BASE_URL + '/getprofile', {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-                setProfileData(response.data);
-                console.log(response.data);
-            } catch (error) {
-                // Handle errors appropriately (e.g., show an error message)
-                console.error('Error fetching profile data:', error);
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setProfile(prevProfile => ({
+            ...prevProfile,
+            [name]: value
+        }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        axios.post(window.API_BASE_URL + '/update',
+        profileData,
+        {
+            headers: {
+                Authorization: `Bearer ${window.TOKEN}`
             }
-        }
-        fetchData(); // Call the function immediately
-    }, []); // Empty dependency array
+        })
+            .then(response => {
+               
+            })
+            .catch(error => {
+                setMessage('Failed to update profile');
+            });
+    };
 
+    if (loading) {
+        return <div>Loading...</div>;
+    }
 
+ 
     return (
         <><Header />
 
             <main id="main" className="main">
                 <div className="pagetitle">
                     <h1>Profile         {profileData.dob}</h1>
-                    
+
                     <nav>
                         <ol className="breadcrumb">
                             <li className="breadcrumb-item"><a href="index.html">Home</a></li>
@@ -48,7 +86,7 @@ const ProfilePage = () => {
                         <div className="col-xl-4">
                             <div className="card">
                                 <div className="card-body profile-card pt-4 d-flex flex-column align-items-center">
-                                    <img src="assets/img/profile-img.jpg" alt="Profile" className="rounded-circle" />
+                                    <img src={profileData.avatar} alt="Profile" className="rounded-circle" />
                                     <h2>{profileData.name}</h2>
                                     <h3>{profileData.job}</h3>
                                     <div className="social-links mt-2">
@@ -62,6 +100,9 @@ const ProfilePage = () => {
                         </div>
 
                         <div className="col-xl-8">
+                        {message.error ?  message.error : 
+                        message.message
+                        }
                             <div className="card">
                                 <div className="card-body pt-3">
                                     <ul className="nav nav-tabs nav-tabs-bordered">
@@ -113,13 +154,13 @@ const ProfilePage = () => {
                                                 <div className="col-lg-9 col-md-8">{profileData.email}</div>
                                             </div>
                                         </div>
- 
+
                                         <div className="tab-pane fade profile-edit pt-3" id="profile-edit">
-                                            <form>
+                                            <form onSubmit={handleSubmit}>
                                                 <div className="row mb-3">
                                                     <label htmlFor="profileImage" className="col-md-4 col-lg-3 col-form-label">Profile Image</label>
                                                     <div className="col-md-8 col-lg-9">
-                                                        <img src="assets/img/profile-img.jpg" alt="Profile" />
+                                                        <img src={profileData.avatar} alt="Profile" />
                                                         <div className="pt-2">
                                                             <a href="#" className="btn btn-primary btn-sm" title="Upload new profile image"><i className="bi bi-upload"></i></a>
                                                             <a href="#" className="btn btn-danger btn-sm" title="Remove my profile image"><i className="bi bi-trash"></i></a>
@@ -129,49 +170,49 @@ const ProfilePage = () => {
                                                 <div className="row mb-3">
                                                     <label htmlFor="fullName" className="col-md-4 col-lg-3 col-form-label">Full Name</label>
                                                     <div className="col-md-8 col-lg-9">
-                                                        <input name="fullName" type="text" className="form-control" id="fullName" defaultValue="Kevin Anderson" />
+                                                        <input onChange={handleChange} value={profileData.name} name='name' type="text" className="form-control" />
                                                     </div>
                                                 </div>
                                                 <div className="row mb-3">
                                                     <label htmlFor="about" className="col-md-4 col-lg-3 col-form-label">About</label>
                                                     <div className="col-md-8 col-lg-9">
-                                                        <textarea name="about" className="form-control" id="about" style={{ height: "100px" }} defaultValue="Sunt est soluta temporibus accusantium neque nam maiores cumque temporibus. Tempora libero non est unde veniam est qui dolor. Ut sunt iure rerum quae quisquam autem eveniet perspiciatis odit. Fuga sequi sed ea saepe at unde."></textarea>
+                                                        <textarea onChange={handleChange} name="about" className="form-control" id="about" style={{ height: "100px" }} >{profileData.about}</textarea>
                                                     </div>
                                                 </div>
                                                 <div className="row mb-3">
                                                     <label htmlFor="company" className="col-md-4 col-lg-3 col-form-label">Company</label>
                                                     <div className="col-md-8 col-lg-9">
-                                                        <input name="company" type="text" className="form-control" id="company" defaultValue="Lueilwitz, Wisoky and Leuschke" />
+                                                        <input onChange={handleChange} value={profileData.company} name="company" type="text" className="form-control" id="company" />
                                                     </div>
                                                 </div>
                                                 <div className="row mb-3">
                                                     <label htmlFor="Job" className="col-md-4 col-lg-3 col-form-label">Job</label>
                                                     <div className="col-md-8 col-lg-9">
-                                                        <input name="job" type="text" className="form-control" id="Job" defaultValue="Web Designer" />
+                                                        <input onChange={handleChange} value={profileData.job} name="job" type="text" className="form-control" id="Job" />
                                                     </div>
                                                 </div>
                                                 <div className="row mb-3">
                                                     <label htmlFor="Country" className="col-md-4 col-lg-3 col-form-label">Country</label>
                                                     <div className="col-md-8 col-lg-9">
-                                                        <input name="country" type="text" className="form-control" id="Country" defaultValue="USA" />
+                                                        <input onChange={handleChange} value={profileData.country} name="country" type="text" className="form-control" id="Country" />
                                                     </div>
                                                 </div>
                                                 <div className="row mb-3">
                                                     <label htmlFor="Address" className="col-md-4 col-lg-3 col-form-label">Address</label>
                                                     <div className="col-md-8 col-lg-9">
-                                                        <input name="address" type="text" className="form-control" id="Address" defaultValue="A108 Adam Street, New York, NY 535022" />
+                                                        <input onChange={handleChange} value={profileData.address} name="address" type="text" className="form-control" id="Address" />
                                                     </div>
                                                 </div>
                                                 <div className="row mb-3">
                                                     <label htmlFor="Phone" className="col-md-4 col-lg-3 col-form-label">Phone</label>
                                                     <div className="col-md-8 col-lg-9">
-                                                        <input name="phone" type="text" className="form-control" id="Phone" defaultValue="(436) 486-3538 x29071" />
+                                                        <input onChange={handleChange} value={profileData.phone} name="phone" type="text" className="form-control" id="Phone" />
                                                     </div>
                                                 </div>
                                                 <div className="row mb-3">
                                                     <label htmlFor="Email" className="col-md-4 col-lg-3 col-form-label">Email</label>
                                                     <div className="col-md-8 col-lg-9">
-                                                        <input name="email" type="email" className="form-control" id="Email" defaultValue="k.anderson@example.com" />
+                                                        <input onChange={handleChange} value={profileData.email} name="email" type="email" className="form-control" id="Email" />
                                                     </div>
                                                 </div>
                                                 <div className="row mb-3">

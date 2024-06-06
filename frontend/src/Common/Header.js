@@ -1,15 +1,19 @@
 import { Link } from 'react-router-dom';
 function Header() {
+const toggleSidebar = () => {
+    console.log('dd');
+    document.body.classList.toggle('toggle-sidebar');
+  };
 
     return (
         <>
             <header id="header" className="header fixed-top d-flex align-items-center">
                 <div className="d-flex align-items-center justify-content-between">
-                    <a href="" className="logo d-flex align-items-center">
+                    <Link to="/dashboard" className="logo d-flex align-items-center">
                         <img src="assets/img/logo.png" alt="" />
                         <span className="d-none d-lg-block">NiceAdmin</span>
-                    </a>
-                    <i className="bi bi-list toggle-sidebar-btn"></i>
+                    </Link>
+                    <i className="bi bi-list toggle-sidebar-btn" onClick={toggleSidebar}></i>
                 </div>
 
                 <div className="search-bar">
@@ -22,7 +26,7 @@ function Header() {
                 <nav className="header-nav ms-auto">
                     <ul className="d-flex align-items-center">
                         <li className="nav-item d-block d-lg-none">
-                            <a className="nav-link nav-icon search-bar-toggle" href="#">
+                            <a className="nav-link nav-icon search-bar-toggle"  href="#">
                                 <i className="bi bi-search"></i>
                             </a>
                         </li>
@@ -148,12 +152,12 @@ function Header() {
                                     </Link>
                                 </li>
                                 <li><hr className="dropdown-divider" /></li>
-                                <li>
+                                {/* <li>
                                     <a className="dropdown-item d-flex align-items-center" href="users-profile.html">
                                         <i className="bi bi-gear"></i>
                                         <span>Account Settings</span>
                                     </a>
-                                </li>
+                                </li> */}
                                 <li><hr className="dropdown-divider" /></li>
                                 <li>
                                     <a className="dropdown-item d-flex align-items-center" href="pages-faq.html">
@@ -172,7 +176,7 @@ function Header() {
                         </li>
                     </ul>
                 </nav>
-            </header> 
+            </header>
 
             <aside id="sidebar" className="sidebar">
                 <ul className="sidebar-nav" id="sidebar-nav">
